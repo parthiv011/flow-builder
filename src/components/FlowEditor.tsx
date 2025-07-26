@@ -27,16 +27,18 @@ const initialNodes: Node<MessageNodeData>[] = []; // Empty initial node list
 const initialEdges: Edge[] = []; // Empty initial edge list
 
 export function FlowEditor() {
-    const [nodes, setNodes] = useState<Node[]>(initialNodes); // State to hold nodes
+    const [nodes, setNodes] = useState<Node<MessageNodeData>[]>(initialNodes); // Explicitly type nodes
     const [edges, setEdges] = useState<Edge[]>(initialEdges); // State to hold edges
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null); // Currently selected node for side panel
     const nodeIdRef = useRef(1); // Ref for generating unique node IDs
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const { screenToFlowPosition } = useReactFlow();
 
-    const selectedNode = nodes.find((n) => n.id === selectedNodeId); // selected node's full data
+    const selectedNode = nodes.find((n) => n.id === selectedNodeId) as
+        | Node<MessageNodeData>
+        | undefined; // Explicitly type selectedNode
 
-    // Handle changes in node positions(drag/move)
+    // Handle changes in node positions (drag/move)
     const onNodesChange: OnNodesChange = useCallback(
         (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
         []
@@ -87,7 +89,7 @@ export function FlowEditor() {
                 id: `node-${nodeIdRef.current++}`, // Generate unique node ID
                 type,
                 position,
-                data: { label: `Message Node` }, // Default label
+                data: { label: 'Message Node' }, // Default label
             };
 
             setNodes((nds) => nds.concat(newNode)); // Add new node to flow
@@ -96,9 +98,12 @@ export function FlowEditor() {
     );
 
     // Triggered when a node is clicked – opens the settings panel
-    const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
-        setSelectedNodeId(node.id);
-    }, []);
+    const onNodeClick = useCallback(
+        (_event: React.MouseEvent, node: Node<MessageNodeData>) => {
+            setSelectedNodeId(node.id);
+        },
+        []
+    );
 
     // Updates node label text live in state as it's changed in settings panel
     const handleNodeTextChange = useCallback(
@@ -167,7 +172,7 @@ export function FlowEditor() {
                             </h2>
                             {/* Input for editing node label */}
                             <input
-                                value={selectedNode?.data.label ?? ''}
+                                value={selectedNode.data.label ?? ''} // TypeScript now knows data.label is string | undefined
                                 onChange={handleNodeTextChange}
                                 className="w-full rounded border px-3 py-2 text-xs text-gray-700 outline-none"
                                 placeholder="Enter message"
@@ -202,9 +207,9 @@ export function FlowEditor() {
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
                                     className="lucide lucide-message-circle-more-icon lucide-message-circle-more"
                                 >
                                     <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />

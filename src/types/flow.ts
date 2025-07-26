@@ -1,3 +1,4 @@
-export type MessageNodeData = {
-    label: string;
-};
+export interface MessageNodeData {
+    label?: string;
+    [key: string]: unknown;
+}
